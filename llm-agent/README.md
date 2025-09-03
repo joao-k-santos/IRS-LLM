@@ -1,7 +1,7 @@
-#Agente LLM para o Sistema de Prevenção de Intrusão Baseado em Host
+# Agente LLM para o Sistema de Prevenção de Intrusão Baseado em Host
 Construido em Docker, Python (FastAPI) e Ollama
 
-#Como construir:
+# Como construir:
 No diretório onde foi feito o clone do repositório do github
 ```sh
 cd ./SPIH/llm-agent
@@ -9,19 +9,19 @@ docker-compose build
 docker-compose up -d
 ```
 
-#Para interromper a execução
+# Para interromper a execução
 ```sh
 docker-compose down
 ```
 
-#Informações de Rede
+# Informações de Rede
 A API fica exposta na porta 8000 no localhost
 http://localhost:8000
 
 O servidor Ollama fica exposto, fora do Docker, na porta 11444 no localhost
 http://localhost:11444
 
-#Para usar o bash de cada Container
+# Para usar o bash de cada Container
 ```sh
 docker exec -it api_llm bash
 docker exec -it ollama bash
