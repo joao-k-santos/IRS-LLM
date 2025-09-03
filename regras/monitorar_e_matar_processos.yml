@@ -1,0 +1,8 @@
+- name: Identificar processos suspeitos
+  shell: "ps aux | grep 'malicious_process' | awk '{print $2}'"
+  register: process_list
+
+- name: Matar processos suspeitos
+  shell: "kill -9 {{ item }}"
+  with_items: "{{ process_list.stdout_lines }}"
+  when: process_list.stdout != ""

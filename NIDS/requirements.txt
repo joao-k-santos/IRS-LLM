@@ -1,0 +1,16 @@
+flwr
+flwr-datasets
+tensorflow
+numpy
+pandas
+imblearn
+scikit-learn
+matplotlib
+h5py
+psycopg2
+sqlalchemy
+python-dotenv
+fastapi[all]
+uvicorn
+PyJWT
+passlib

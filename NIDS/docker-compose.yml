@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_nids
+    restart: always
+    environment:
+      POSTGRES_DB: nids_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    network_mode: "host"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  nids_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nids_app
+    restart: always
+    depends_on:
+      - db
+    network_mode: "host"
+    volumes:
+      - flower_data:/root/.flower
+    environment:
+      DB_HOST: localhost
+      DB_NAME: nids_db
+      DB_USER: user
+      DB_PASSWORD: password
+    mem_limit: 4G
+
+volumes:
+  flower_data:
+  pgdata:

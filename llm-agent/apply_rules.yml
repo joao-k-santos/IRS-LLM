@@ -1,0 +1,22 @@
+- hosts: all
+  tasks:
+    - name: Baixar regras da IA
+      uri:
+        url: "http://servidor-api:8000/gerar_regras"
+        return_content: yes
+      register: regras
+
+    - name: Aplicar regras de firewall
+      shell: "{{ item }}"
+      with_items: "{{ regras.json.firewall }}"
+      when: regras.json.firewall | length > 0
+
+    - name: Aplicar regras de IDS
+      shell: "{{ item }}"
+      with_items: "{{ regras.json.ids }}"
+      when: regras.json.ids | length > 0
+
+    - name: Aplicar regras de IPS
+      shell: "{{ item }}"
+      with_items: "{{ regras.json.ips }}"
+      when: regras.json.ips | length > 0

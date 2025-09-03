@@ -1,0 +1,11 @@
+- name: Limitar conexões por IP no iptables
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    match: state
+    state: NEW
+    recent_name: brute_force
+    jump: DROP
+    seconds: 60
+    hitcount: 10
+    comment: "Bloqueia IPs que fazem mais de 10 conexões em 60s"

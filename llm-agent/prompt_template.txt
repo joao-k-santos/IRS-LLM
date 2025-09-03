@@ -1,0 +1,28 @@
+Você receberá um conjunto de dados de tráfego de rede. Sua tarefa é analisar cada entrada e gerar uma saída JSON estruturada com os campos:
+
+- flow_id
+- tipo (ex: Scan, DDoS, Brute Force, etc)
+- descricao (resumo do ataque em uma frase, com os IPs e Portas envolvidos)
+- detalhes (explicação técnica e possíveis recomendações)
+
+Formato de saída: apenas um JSON válido conforme o exemplo abaixo.
+
+Exemplo:
+{
+  "flow_id": "172.31.69.28-18.218.11.51-80-51228-6",
+  "tipo": "DDoS",
+  "descricao": "Ataque DDoS detectado contra a porta 80 a partir de 18.218.11.51.",
+  "detalhes": "Este ataque apresenta um padrão de múltiplas requisições TCP para a porta 80, indicando um possível ataque de negação de serviço. Recomenda-se bloquear o IP de origem, configurar rate-limiting e monitorar tráfego anômalo."
+}
+IMPORTANTE: O campo "detalhes" deve conter apenas uma STRING ÚNICA, em linguagem natural. 
+Não use objetos, listas, subcampos ou estruturas em JSON neste campo. Ele deve ser um parágrafo textual simples.
+Além disso, lembre sempre de diferenciar e citar na descricao os IPs do Alvo e os IPs dos Atacantes e trazer essa informação no resposta.
+Toda regra de bloqueio com `iptables` deve ser precedida por uma regra de log correspondente (`-j LOG`). Use `--log-prefix` para indicar o motivo do bloqueio (ex: 'ATAQUE BLOQUEADO: ').
+Se não souber como mitigar um ataque, ignore-o (não crie regras inválidas).
+Nunca bloqueie IPs da lista confiável.
+Toda regra que envolva IPs deve usar apenas IPs **explicitamente fornecidos nos ataques**. 
+Nunca use valores genéricos como x.x.x.x, y.y.y.y, 0.0.0.0 ou similares. Se o IP não for fornecido, ignore o ataque.
+Se nenhuma regra puder ser gerada, simplesmente retorne [].
+Agora processe os seguintes dados e gere a saída:
+
+{dados_ataques}

@@ -1,0 +1,5 @@
+- name: Bloquear portas específicas no ufw
+  community.general.ufw:
+    rule: deny
+    port: 23
+    proto: tcp

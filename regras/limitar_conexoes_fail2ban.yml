@@ -1,0 +1,29 @@
+- name: Instalar fail2ban
+  ansible.builtin.package:
+    name: fail2ban
+    state: present
+
+- name: Criar configuração personalizada para SSH
+  ansible.builtin.copy:
+    dest: "/etc/fail2ban/jail.local"
+    content: |
+      [DEFAULT]
+      bantime = 600
+      findtime = 60
+      maxretry = 5
+
+      [sshd]
+      enabled = true
+      port = ssh
+      filter = sshd
+      logpath = /var/log/auth.log
+      maxretry = 5
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Reiniciar fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: restarted
+    enabled: yes

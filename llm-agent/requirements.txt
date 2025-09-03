@@ -1,0 +1,9 @@
+fastapi[all]
+uvicorn
+requests
+PyJWT
+passlib
+aiohttp
+python-jose
+pydantic
+python-dotenv 

@@ -1,0 +1,5 @@
+- name: Limitar conexões SSH a 10 por minuto por IP
+  community.general.ufw:
+    rule: limit
+    port: ssh
+    proto: tcp

@@ -1,0 +1,17 @@
+- name: Instalar fail2ban
+  ansible.builtin.package:
+    name: fail2ban
+    state: present
+
+- name: Copiar configuração do fail2ban
+  ansible.builtin.copy:
+    src: jail.local
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Reiniciar fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: restarted

@@ -1,0 +1,23 @@
+- name: Criar script de monitoramento de conexões
+  ansible.builtin.copy:
+    dest: "/usr/local/bin/monitor_connections.sh"
+    content: |
+      #!/bin/bash
+      # Lista portas abertas e verifica se estão autorizadas
+      ALLOWED_PORTS=("22" "80" "443")  # Defina as portas permitidas
+      for port in $(netstat -tuln | awk '{print $4}' | grep -Eo '[0-9]+$' | sort -u); do
+        if [[ ! " ${ALLOWED_PORTS[@]} " =~ " ${port} " ]]; then
+          iptables -A INPUT -p tcp --dport $port -j DROP
+          echo "Porta $port bloqueada" >> /var/log/blocked_ports.log
+        fi
+      done
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Criar cron job para rodar a cada 5 minutos
+  ansible.builtin.cron:
+    name: "Monitorar conexões"
+    job: "/usr/local/bin/monitor_connections.sh"
+    minute: "*/5"
+    user: root

@@ -1,0 +1,7 @@
+- name: Listar conexões ativas
+  shell: "netstat -tunap"
+  register: netstat_output
+
+- name: Exibir conexões
+  debug:
+    msg: "{{ netstat_output.stdout_lines }}"

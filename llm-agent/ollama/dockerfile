@@ -1,0 +1,27 @@
+FROM ollama/ollama
+# FROM ollama/ollama:0.6.5
+
+# Nome do modelo base
+#ENV BASE_MODEL=llama3.2:3b-instruct-q5_K_M
+#ENV BASE_MODEL=gemma3:4b
+#ENV BASE_MODEL=gemma3:4b-it-qat
+ENV BASE_MODEL=gemma3:12b-it-qat
+#ENV BASE_MODEL=qwen3:4b
+#ENV BASE_MODEL=phi3:3.8b-instruct
+# Nome do novo modelo com context window aumentado
+ENV CUSTOM_MODEL_NAME=meu-modelo
+# Tamanho do context window desejado
+ENV CONTEXT_WINDOW=10000
+
+USER root
+# Crie o Modelfile dentro do container
+RUN mkdir -p /root/.ollama/models/
+RUN echo "FROM ${BASE_MODEL}" > /root/.ollama/models/${CUSTOM_MODEL_NAME}
+RUN echo "PARAMETER num_ctx ${CONTEXT_WINDOW}" >> /root/.ollama/models/${CUSTOM_MODEL_NAME}
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+# Puxe o modelo base (opcional, pode ser feito no primeiro run)
+# RUN ollama pull ${BASE_MODEL}
+
+# Crie o modelo personalizado ao iniciar o container
+ENTRYPOINT [ "/entrypoint.sh" ]

@@ -1,0 +1,39 @@
+- name: Criar serviço systemd para monitoramento
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/monitor_connections.service"
+    content: |
+      [Unit]
+      Description=Monitoramento de conexões suspeitas
+      After=network.target
+
+      [Service]
+      ExecStart=/usr/local/bin/monitor_connections.sh
+      Type=oneshot
+      User=root
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Criar timer systemd para rodar a cada 5 minutos
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/monitor_connections.timer"
+    content: |
+      [Unit]
+      Description=Executa o monitoramento de conexões a cada 5 minutos
+
+      [Timer]
+      OnBootSec=1min
+      OnUnitActiveSec=5min
+      Unit=monitor_connections.service
+
+      [Install]
+      WantedBy=timers.target
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Habilitar e iniciar o timer
+  ansible.builtin.systemd:
+    name: monitor_connections.timer
+    enabled: yes
+    state: started

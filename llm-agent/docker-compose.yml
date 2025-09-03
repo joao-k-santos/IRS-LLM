@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  ollama:
+    build:
+      context: ./ollama
+      args:
+        CUSTOM_MODEL_NAME: meu-modelo
+    environment:
+      - CUSTOM_MODEL_NAME=meu-modelo
+      - OLLAMA_HOST=0.0.0.0
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 14G
+    network_mode: "host"
+    volumes:
+      - ollama_data:/root/.ollama
+    
+
+  api:
+    build: .
+    container_name: api_llm
+    restart: always
+    network_mode: "host"
+    depends_on:
+      - ollama
+    volumes:
+      - db_data:/app/databases
+    environment:
+      - OLLAMA_URL=http://localhost:11434
+    command: sh -c "python init_db.py && uvicorn server:app --host 0.0.0.0 --port=8000"
+
+  watcher:
+    build: .
+    container_name: watcher_llm
+    restart: always
+    network_mode: "host"
+    depends_on:
+      - api
+    volumes:
+      - db_data:/app/databases
+    environment:
+      - OLLAMA_URL=http://localhost:11434
+    command: python -u watcher.py
+
+volumes:
+  ollama_data:
+  db_data:
