@@ -1,9 +1,9 @@
-version: '3.9'
 
 services:
   orquestrador:
     build:
       context: ./orquestrador
+      network: host
     container_name: orquestrador
     hostname: orquestrador
     volumes:
@@ -26,6 +26,7 @@ services:
   host_final_1:
     build:
       context: ./host_final
+      network: host
     container_name: host_final_1
     hostname: host_final_1
     volumes:
@@ -47,6 +48,8 @@ services:
   cnc:
     build:
       context: ./cnc
+      network: host
+    image: cnc_bot_image:latest
     container_name: cnc
     hostname: cnc
     expose:
@@ -58,8 +61,9 @@ services:
         ipv4_address: 172.28.0.100
 
   bot_1:
-    build:
-      context: ./cnc
+    image: cnc_bot_image:latest
+    depends_on:
+      - cnc
     container_name: bot_1
     hostname: bot_1
     expose:
@@ -71,8 +75,9 @@ services:
         ipv4_address: 172.28.0.20
 
   bot_2:
-    build:
-      context: ./cnc
+    image: cnc_bot_image:latest
+    depends_on:
+      - cnc
     container_name: bot_2
     hostname: bot_2
     expose:
@@ -84,8 +89,9 @@ services:
         ipv4_address: 172.28.0.30
 
   bot_3:
-    build:
-      context: ./cnc
+    image: cnc_bot_image:latest
+    depends_on:
+      - cnc
     container_name: bot_3
     hostname: bot_3
     expose:
@@ -97,8 +103,9 @@ services:
         ipv4_address: 172.28.0.40
 
   bot_4:
-    build:
-      context: ./cnc
+    image: cnc_bot_image:latest
+    depends_on:
+      - cnc
     container_name: bot_4
     hostname: bot_4
     expose:
@@ -110,8 +117,9 @@ services:
         ipv4_address: 172.28.0.50
 
   bot_5:
-    build:
-      context: ./cnc
+    image: cnc_bot_image:latest
+    depends_on:
+      - cnc
     container_name: bot_5
     hostname: bot_5
     expose:

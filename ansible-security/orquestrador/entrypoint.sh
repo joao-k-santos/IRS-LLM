@@ -1,17 +1,17 @@
-#!/bin/sh
-# Habilita saída imediata em caso de erro
+#!/bin/bash
 set -e
 
-echo "Executando Ansible playbook na inicialização..."
-# Execute seu playbook Ansible
-# Certifique-se que os caminhos 'inventory' e 'playbook' estão corretos dentro do container
-ansible-playbook -i /home/ansible_user/orquestrador/inventory/hosts.yml /home/ansible_user/orquestrador/playbooks/setup_orquestrador.yml
+echo "Aguardando o host_final_1 (172.28.0.10:22) estar pronto..."
+until timeout 2 bash -c "</dev/tcp/172.28.0.10/22" 2>/dev/null; do
+  echo "Aguardando SSH do host_final_1..."
+  sleep 3
+done
+echo "host_final_1 disponível! Executando Ansible playbook..."
 
-echo "Playbook Ansible concluído."
+ansible-playbook -i /home/ansible_user/orquestrador/inventory/hosts.yml /home/ansible_user/orquestrador/playbooks/setup_orquestrador.yml || echo "Aviso: Falha no playbook inicial do Ansible, mantendo container ativo."
 
 echo "Aplicando regras de firewall nft..."
-nft -f /home/ansible_user/orquestrador/scripts/firewall_config.nft
-# Use 'exec' para substituir este script pelo processo do cron.
-# Isso faz o 'cron -f' se tornar o PID 1 (ou o processo principal monitorado pelo Docker).
+nft -f /home/ansible_user/orquestrador/scripts/firewall_config.nft || true
+
 echo "Iniciando cron em primeiro plano..."
 exec cron -f
