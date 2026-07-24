@@ -1,6 +1,6 @@
 # 📖 Manual de Uso - Sistema de Prevenção de Intrusão Baseado em Host (SPIH)
 
-Este documento descreve como subir o ambiente em containers Docker, como funcionam o **Suricata** e os **coletores de logs (PySpark)** no *Host Final*, como orquestrar as regras de segurança e como **simular os ataques** utilizando a botnet via **Command & Control (CNC)**.
+Este documento descreve como subir o ambiente em containers Docker, como funcionam o **Suricata** e os **coletores de logs (PySpark)** no *Host Final*, como orquestrar as regras de segurança, como **simular os ataques** utilizando a botnet via **Command & Control (CNC)** e como solucionar problemas comuns em ambientes de Máquina Virtual (VM) e redes institucionais.
 
 ---
 
@@ -125,21 +125,49 @@ O container `orquestrador` gerencia o download de novas regras de segurança ger
 
 ---
 
+## 🛠️ 7. Solução de Problemas (Troubleshooting em VMs e Redes Institucionais)
+
+### 7.1. Erro de DNS / Timeout na busca de imagens (`i/o timeout` no Docker Hub)
+- **Sintoma**: Erros como `dial tcp: lookup registry-1.docker.io on 127.0.0.53:53: i/o timeout` ou `lookup auth.docker.io on 8.8.8.8:53: i/o timeout`.
+- **Causa**: Em VMs Ubuntu, a ponte do Docker não consegue consultar o DNS de loopback `127.0.0.53`. Além disso, redes corporativas/institucionais (sub-redes privadas como `172.16.x.x`) costumam bloquear tráfego para DNSs externos genéricos como `8.8.8.8:53`.
+- **Solução**:
+  1. Copie o DNS real da sua interface de rede fornecido pela instituição para o `/etc/resolv.conf`:
+     ```bash
+     sudo cp /run/systemd/resolve/resolv.conf /etc/resolv.conf
+     ```
+  2. Execute o build desativando a camada isolada do BuildKit:
+     ```bash
+     sudo DOCKER_BUILDKIT=0 docker compose up -d --build
+     ```
+
+### 7.2. Condição de Corrida (Orquestrador caindo com `Exited (1)`)
+- **Sintoma**: O container `orquestrador` caía imediatamente na subida do Compose.
+- **Causa**: O `ansible-playbook` tentava acessar a porta 22 do `host_final_1` antes do serviço SSH do container alvo estar ativo.
+- **Solução**: O script `/orquestrador/entrypoint.sh` agora realiza *polling* de porta (`dev/tcp/172.28.0.10/22`) e aguarda o SSH do `host_final_1` estar 100% disponível antes de executar os playbooks Ansible.
+
+### 7.3. Otimização do Build da Botnet
+- **Melhoria**: O `docker-compose.yml` foi otimizado para compilar a imagem do `cnc` apenas **uma vez** (`cnc_bot_image:latest`) e reutilizá-la para todos os bots (`bot_1` a `bot_5`), reduzindo de 8 compilações para apenas 3 imagens.
+
+---
+
 ## 📝 Resumo Rápido de Comandos (Cheat Sheet)
 
 ```bash
-# 1. Subir o ambiente
-docker compose up -d --build
+# 1. Ajustar DNS em redes restritas / VMs (se necessário)
+sudo cp /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-# 2. Simular Portscan (no container CNC)
+# 2. Subir o ambiente (sem BuildKit se houver erro de rede)
+sudo DOCKER_BUILDKIT=0 docker compose up -d --build
+
+# 3. Simular Portscan (no container CNC)
 docker exec -it cnc ansible-playbook -i /home/bot/inventory/bots.yml /home/bot/playbooks/ataque_portscan.yml
 
-# 3. Simular Brute-Force SSH (no container CNC)
+# 4. Simular Brute-Force SSH (no container CNC)
 docker exec -it cnc ansible-playbook -i /home/bot/inventory/bots.yml /home/bot/playbooks/ataque_bruteforce.yml
 
-# 4. Ver alertas gerados em tempo real no Host Final
+# 5. Ver alertas gerados em tempo real no Host Final
 docker exec -it host_final_1 tail -f /var/log/suricata/eve.json
 
-# 5. Parar o ambiente
+# 6. Parar o ambiente
 docker compose down
 ```
